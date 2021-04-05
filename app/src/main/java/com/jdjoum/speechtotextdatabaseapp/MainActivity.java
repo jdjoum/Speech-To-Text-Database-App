@@ -90,11 +90,6 @@ public class MainActivity extends AppCompatActivity {
                     ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     tvText.setText(text.get(0));
                     setSpeechText(text.get(0));
-                    /*
-                    for(int i = 0; i < text.size(); i++) {
-                        System.out.println(i + " " + text.get(i));
-                    }
-                    */
                 }
                 break;
         }
