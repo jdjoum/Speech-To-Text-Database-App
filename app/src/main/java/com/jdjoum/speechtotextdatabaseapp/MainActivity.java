@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
     protected static final int RESULT_SPEECH = 1;
     private ImageButton btnSpeak;
     private TextView tvText;
+    DatabaseHelper mDatabaseHelper;
+    private Button btnAdd, btnViewData;
+    private String speechText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
         // Mapping Member Variables to View Elements
         tvText = findViewById(R.id.tvText);
         btnSpeak = findViewById(R.id.btnSpeak);
+        btnAdd = findViewById(R.id.btnAdd);
+        btnViewData = findViewById(R.id.btnViewData);
+
+        mDatabaseHelper = new DatabaseHelper(this);
+
 
         // Speak Button OnClick
         btnSpeak.setOnClickListener(new View.OnClickListener() {
@@ -47,6 +57,28 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        // Add Button OnClick
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(speechText.length() != 0) {
+                    // Add the speech text to the database
+                    AddData(speechText);
+                } else {
+                    toastMessage("You must use Speech-To-Text before adding to the database!");
+                }
+            }
+        });
+
+        // View Data Button OnClick
+        btnViewData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ListDataActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -57,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 if(resultCode == RESULT_OK && data != null) {
                     ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     tvText.setText(text.get(0));
+                    setSpeechText(text.get(0));
                     /*
                     for(int i = 0; i < text.size(); i++) {
                         System.out.println(i + " " + text.get(i));
@@ -65,5 +98,23 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
         }
+    }
+
+    public void setSpeechText(String text) {
+        this.speechText = text;
+    }
+
+    public void AddData(String input) {
+        boolean insertData = mDatabaseHelper.addData(input);
+
+        if (insertData) {
+            toastMessage("Data Successfully Inserted!");
+        } else {
+            toastMessage("Something went wrong");
+        }
+    }
+
+    private void toastMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
